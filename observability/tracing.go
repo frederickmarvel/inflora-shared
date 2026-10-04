@@ -3,6 +3,8 @@ package observability
 import (
 	"context"
 	"fmt"
+	"os"
+	"strconv"
 	"strings"
 
 	"go.opentelemetry.io/otel"
@@ -15,6 +17,15 @@ import (
 type TracingConfig struct {
 	ServiceName, Endpoint, Sampler string
 	SamplerArg                     float64
+}
+
+// InitTracer initializes tracing from the documented environment variables.
+func InitTracer(serviceName string) (*sdktrace.TracerProvider, error) {
+	ratio, _ := strconv.ParseFloat(os.Getenv("OTEL_TRACES_SAMPLER_ARG"), 64)
+	if ratio == 0 {
+		ratio = 0.1
+	}
+	return NewTracerProvider(context.Background(), TracingConfig{ServiceName: serviceName, Endpoint: os.Getenv("OTEL_EXPORTER_OTLP_ENDPOINT"), Sampler: os.Getenv("OTEL_TRACES_SAMPLER"), SamplerArg: ratio})
 }
 
 // NewTracerProvider configures the global provider. With an empty endpoint it

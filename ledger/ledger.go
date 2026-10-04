@@ -51,6 +51,16 @@ type DoubleEntryParams struct {
 	ExternalRef                  string
 	Metadata                     map[string]interface{}
 }
+type LedgerAccount struct {
+	ID          string
+	StreamerID  string
+	AccountType AccountType
+	Currency    string
+	BalanceIDR  int64
+	Version     int64
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+}
 type LedgerEntry struct {
 	ID, StreamerID, AccountID string
 	Direction                 Direction
@@ -148,4 +158,8 @@ func (l *Ledger) Reconcile(ctx context.Context, streamerID string) (ReconcileRes
 	}
 	r.Balanced = r.Drift == 0
 	return r, nil
+}
+
+func Reconcile(ctx context.Context, database *sql.DB, streamerID string) (ReconcileResult, error) {
+	return New(database).Reconcile(ctx, streamerID)
 }

@@ -49,6 +49,12 @@ func Open(ctx context.Context, cfg Config) (*sql.DB, error) {
 	return database, nil
 }
 
+// NewPostgres is the concise Phase 1 constructor. Services that need full pool
+// tuning can use Open with Config directly.
+func NewPostgres(ctx context.Context, dsn string, maxConns int) (*sql.DB, error) {
+	return Open(ctx, Config{DSN: dsn, MaxOpenConns: maxConns, MaxIdleConns: maxConns / 5, ConnMaxLifetime: 5 * time.Minute, PingTimeout: 5 * time.Second})
+}
+
 // InTx executes fn in a serializable transaction. It rolls back on errors and
 // panics, and only returns nil after Commit succeeds.
 func InTx(ctx context.Context, database *sql.DB, fn func(*sql.Tx) error) (err error) {

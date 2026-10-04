@@ -16,6 +16,13 @@ type Metrics struct {
 	InFlight prometheus.Gauge
 }
 
+// InitMetrics returns the registry and HTTP middleware form named in the Phase
+// 1 contract. NewMetrics exposes the counters and handler as well.
+func InitMetrics() (*prometheus.Registry, func(http.Handler) http.Handler) {
+	m := NewMetrics("")
+	return m.Registry, m.Middleware
+}
+
 // NewMetrics returns an isolated registry suitable for tests and for avoiding
 // duplicate global registrations in multi-service processes.
 func NewMetrics(serviceName string) *Metrics {

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/nats-io/nats.go"
@@ -68,6 +69,7 @@ type NATSSubscriber struct {
 	conn *nats.Conn
 	js   nats.JetStreamContext
 	cfg  NATSConfig
+	seen sync.Map
 }
 
 func NewNATSSubscriber(cfg NATSConfig) (*NATSSubscriber, error) {
@@ -114,7 +116,12 @@ func (s *NATSSubscriber) Subscribe(ctx context.Context, subject, durable string,
 				_ = msg.Term()
 				continue
 			}
+			if _, duplicate := s.seen.LoadOrStore(envelope.EventID, struct{}{}); duplicate {
+				_ = msg.Ack()
+				continue
+			}
 			if err = handler(ctx, envelope); err != nil {
+				s.seen.Delete(envelope.EventID)
 				_ = msg.Nak()
 				continue
 			}
