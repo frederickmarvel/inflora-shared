@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package inflora.palantir.v1;
+
+option go_package = "github.com/frederickmarvel/inflora-shared/gen/go/palantir/v1;palantirv1";
+
+message CreateTopUpRequest {
+  string saruman_donation_id = 1;
+  string streamer_id = 2;
+  int64 amount_idr = 3;
+  string currency = 4;
+  string donor_display_name = 5;
+  string message = 6;
+  bool is_anonymous = 7;
+  string client_ip = 8;
+  string user_agent = 9;
+  string idempotency_key = 10;
+  int64 expires_at_unix = 11;
+}
+
+message CreateTopUpResponse {
+  string charge_id = 1;
+  string payment_url = 2;
+  string provider_name = 3;
+  int64 expires_at_unix = 4;
+}
+
+message SettleTopUpRequest {
+  string provider_event_id = 1;
+  string provider_name = 2;
+  string charge_id = 3;
+  bytes raw_payload = 4;
+}
+
+message SettleTopUpResponse {
+  string donation_id = 1;
+  string ledger_correlation_id = 2;
+  int64 platform_fee_idr = 3;
+  int64 net_idr = 4;
+  string provider_charge_id = 5;
+}
+
+service TopUpService {
+  rpc CreateTopUp(CreateTopUpRequest) returns (CreateTopUpResponse);
+  rpc SettleTopUp(SettleTopUpRequest) returns (SettleTopUpResponse);
+}

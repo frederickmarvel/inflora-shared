@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package inflora.palantir.v1;
+
+option go_package = "github.com/frederickmarvel/inflora-shared/gen/go/palantir/v1;palantirv1";
+
+message CreateWithdrawalRequest {
+  string saruman_payout_id = 1;
+  string streamer_id = 2;
+  int64 amount_idr = 3;
+  string bank_account_ref = 4;
+  string idempotency_key = 5;
+  int64 requested_at_unix = 6;
+}
+
+message CreateWithdrawalResponse {
+  string provider_payout_id = 1;
+  string status = 2;
+}
+
+message SettleWithdrawalRequest {
+  string provider_payout_id = 1;
+  string provider_event_id = 2;
+  bytes raw_payload = 3;
+}
+
+message SettleWithdrawalResponse {
+  string payout_id = 1;
+  string status = 2;
+  string failure_code = 3;
+  string bank_reference = 4;
+}
+
+service WithdrawalService {
+  rpc CreateWithdrawal(CreateWithdrawalRequest) returns (CreateWithdrawalResponse);
+  rpc SettleWithdrawal(SettleWithdrawalRequest) returns (SettleWithdrawalResponse);
+}

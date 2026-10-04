@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package inflora.palantir.v1;
+
+option go_package = "github.com/frederickmarvel/inflora-shared/gen/go/palantir/v1;palantirv1";
+
+message CreateRefundRequest {
+  string saruman_refund_id = 1;
+  string donation_id = 2;
+  string streamer_id = 3;
+  int64 amount_idr = 4;
+  string reason = 5;
+  string idempotency_key = 6;
+}
+
+message CreateRefundResponse {
+  string provider_refund_id = 1;
+  string status = 2;
+}
+
+service RefundService {
+  rpc CreateRefund(CreateRefundRequest) returns (CreateRefundResponse);
+}
