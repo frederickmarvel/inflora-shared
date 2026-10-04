@@ -1,9 +1,6 @@
 package events
 
-import (
-	"encoding/json"
-	"time"
-)
+import "time"
 
 type DonationIntentCreatedEvent struct {
 	IntentID         string    `json:"intent_id"`
@@ -59,13 +56,18 @@ type DonationChargedEvent struct {
 }
 
 type DonationSettledEvent struct {
-	DonationID, IntentID, StreamerID   string
-	AmountIDR, MDRIDR, NetIDR          int64
-	ProviderName, ProviderSettlementID string
-	SettlementHeldSeconds              int
-	LedgerEntryIDs                     []string
-	LedgerCorrelationID                string
-	SettledAt                          time.Time
+	DonationID            string    `json:"donation_id"`
+	IntentID              string    `json:"intent_id"`
+	StreamerID            string    `json:"streamer_id"`
+	AmountIDR             int64     `json:"amount_idr"`
+	MDRIDR                int64     `json:"mdr_idr"`
+	NetIDR                int64     `json:"net_idr"`
+	ProviderName          string    `json:"provider_name"`
+	ProviderSettlementID  string    `json:"provider_settlement_id"`
+	SettlementHeldSeconds int       `json:"settlement_held_seconds"`
+	LedgerEntryIDs        []string  `json:"ledger_entry_ids"`
+	LedgerCorrelationID   string    `json:"ledger_correlation_id"`
+	SettledAt             time.Time `json:"settled_at"`
 }
 type DonationFailedEvent struct {
 	IntentID          string    `json:"intent_id"`
@@ -215,24 +217,3 @@ type FraudFlaggedEvent struct {
 	ActionTaken      string    `json:"action_taken"`
 	FlaggedAt        time.Time `json:"flagged_at"`
 }
-
-// Explicit tags for the settled payload, kept verbose to prevent accidental
-// wire changes if Go field names are refactored.
-func (e DonationSettledEvent) MarshalJSON() ([]byte, error) {
-	type wire struct {
-		DonationID            string    `json:"donation_id"`
-		IntentID              string    `json:"intent_id"`
-		StreamerID            string    `json:"streamer_id"`
-		AmountIDR             int64     `json:"amount_idr"`
-		MDRIDR                int64     `json:"mdr_idr"`
-		NetIDR                int64     `json:"net_idr"`
-		ProviderName          string    `json:"provider_name"`
-		ProviderSettlementID  string    `json:"provider_settlement_id"`
-		SettlementHeldSeconds int       `json:"settlement_held_seconds"`
-		LedgerEntryIDs        []string  `json:"ledger_entry_ids"`
-		LedgerCorrelationID   string    `json:"ledger_correlation_id"`
-		SettledAt             time.Time `json:"settled_at"`
-	}
-	return marshal(wire(e))
-}
-func marshal(v any) ([]byte, error) { return json.Marshal(v) }
