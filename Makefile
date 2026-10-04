@@ -1,7 +1,10 @@
-.PHONY: build test lint tidy
+.PHONY: build generate test lint tidy
 
 build:
 	go build ./...
+
+generate:
+	buf generate
 
 test:
 	go test -race ./...
