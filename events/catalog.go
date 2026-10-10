@@ -3,26 +3,30 @@ package events
 import "time"
 
 type DonationIntentCreatedEvent struct {
-	IntentID         string    `json:"intent_id"`
-	DonationID       string    `json:"donation_id"`
-	StreamerID       string    `json:"streamer_id"`
-	AmountIDR        int64     `json:"amount_idr"`
-	Currency         string    `json:"currency,omitempty"`
-	PaymentMethod    string    `json:"payment_method,omitempty"`
-	DonorDisplayName string    `json:"donor_display_name,omitempty"`
-	DonorEmail       string    `json:"donor_email,omitempty"`
-	Message          string    `json:"message,omitempty"`
-	IsAnonymous      bool      `json:"is_anonymous"`
-	VoiceURL         string    `json:"voice_url,omitempty"`
-	VoiceDurationSec int       `json:"voice_duration_sec,omitempty"`
-	YouTubeURL       string    `json:"youtube_url,omitempty"`
-	YouTubeStartSec  int       `json:"youtube_start_sec,omitempty"`
-	YouTubeEndSec    int       `json:"youtube_end_sec,omitempty"`
-	ClientIP         string    `json:"client_ip,omitempty"`
-	UserAgent        string    `json:"user_agent,omitempty"`
-	CaptchaToken     string    `json:"captcha_token,omitempty"`
-	ExpiresAt        time.Time `json:"expires_at"`
-	CreatedAt        time.Time `json:"created_at"`
+	IntentID             string    `json:"intent_id"`
+	DonationID           string    `json:"donation_id"`
+	StreamerID           string    `json:"streamer_id"`
+	AmountIDR            int64     `json:"amount_idr"`
+	Currency             string    `json:"currency,omitempty"`
+	PaymentMethod        string    `json:"payment_method,omitempty"`
+	DonorDisplayName     string    `json:"donor_display_name,omitempty"`
+	DonorEmail           string    `json:"donor_email,omitempty"`
+	Message              string    `json:"message,omitempty"`
+	IsAnonymous          bool      `json:"is_anonymous"`
+	DisplayRateIDRPerSec int64     `json:"display_rate_idr_per_sec"`
+	DisplayMinSec        int       `json:"display_min_sec"`
+	DisplayMaxSec        int       `json:"display_max_sec"`
+	DisplayDurationSec   int       `json:"display_duration_sec"`
+	VoiceURL             string    `json:"voice_url,omitempty"`
+	VoiceDurationSec     int       `json:"voice_duration_sec,omitempty"`
+	YouTubeURL           string    `json:"youtube_url,omitempty"`
+	YouTubeStartSec      int       `json:"youtube_start_sec,omitempty"`
+	YouTubeEndSec        int       `json:"youtube_end_sec,omitempty"`
+	ClientIP             string    `json:"client_ip,omitempty"`
+	UserAgent            string    `json:"user_agent,omitempty"`
+	CaptchaToken         string    `json:"captcha_token,omitempty"`
+	ExpiresAt            time.Time `json:"expires_at"`
+	CreatedAt            time.Time `json:"created_at"`
 }
 
 type DonationChargedEvent struct {

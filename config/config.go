@@ -63,18 +63,24 @@ type AuthConfig struct {
 }
 
 type PaymentConfig struct {
-	Provider           string
-	PlatformFeeBPS     int
-	MinDonationIDR     int64
-	MaxDonationIDR     int64
-	IntentTTL          time.Duration
-	MidtransServerKey  string
-	MidtransClientKey  string
-	MidtransEnv        string
-	MidtransWebhookURL string
-	XenditSecretKey    string
-	XenditPublicKey    string
-	XenditWebhookToken string
+	Provider            string
+	PlatformFeeBPS      int
+	MinDonationIDR      int64
+	MaxDonationIDR      int64
+	IntentTTL           time.Duration
+	MidtransServerKey   string
+	MidtransClientKey   string
+	MidtransEnv         string
+	MidtransWebhookURL  string
+	XenditSecretKey     string
+	XenditPublicKey     string
+	XenditWebhookToken  string
+	PivotMerchantID     string
+	PivotMerchantSecret string
+	PivotCallbackKey    string
+	PivotEnv            string
+	PivotBaseURL        string
+	PivotRedirectURL    string
 }
 
 type GatewayConfig struct {
@@ -235,6 +241,15 @@ func Load(serviceName string) (Config, error) {
 	c.Payment.XenditSecretKey = os.Getenv("XENDIT_SECRET_KEY")
 	c.Payment.XenditPublicKey = os.Getenv("XENDIT_PUBLIC_KEY")
 	c.Payment.XenditWebhookToken = os.Getenv("XENDIT_WEBHOOK_TOKEN")
+	c.Payment.PivotMerchantID = os.Getenv("PIVOT_MERCHANT_ID")
+	c.Payment.PivotMerchantSecret = os.Getenv("PIVOT_MERCHANT_SECRET")
+	c.Payment.PivotCallbackKey = os.Getenv("PIVOT_CALLBACK_KEY")
+	c.Payment.PivotEnv, err = optionalEnum("PIVOT_ENV", "sandbox", "production")
+	if err != nil {
+		return Config{}, err
+	}
+	c.Payment.PivotBaseURL = os.Getenv("PIVOT_BASE_URL")
+	c.Payment.PivotRedirectURL = os.Getenv("PIVOT_REDIRECT_URL")
 
 	c.Gateway.Address = value("SM_GATEWAY_ADDR", "localhost:7001")
 	c.Gateway.EngineAPIKey = os.Getenv("SM_GATEWAY_ENGINE_API_KEY")

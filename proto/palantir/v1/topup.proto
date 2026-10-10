@@ -16,6 +16,17 @@ message CreateTopUpRequest {
   string user_agent = 9;
   string idempotency_key = 10;
   int64 expires_at_unix = 11;
+  // Redirect URLs for the hosted payment page. Empty means the provider's
+  // defaults are used; the donor's browser returns here after paying.
+  string success_return_url = 12;
+  string failure_return_url = 13;
+  string expiration_return_url = 14;
+  // Human-readable donation description carried into the provider order
+  // (message, voice note, clip, call request, …).
+  string description = 15;
+  // Receipt email, carried into the provider order for refund/notification
+  // flows.
+  string donor_email = 16;
 }
 
 message CreateTopUpResponse {
@@ -23,6 +34,9 @@ message CreateTopUpResponse {
   string payment_url = 2;
   string provider_name = 3;
   int64 expires_at_unix = 4;
+  // The method the provider session actually uses (e.g. "QRIS", "CARD",
+  // "REDIRECT"). Persisted verbatim; the caller must not guess it.
+  string payment_method = 5;
 }
 
 message SettleTopUpRequest {
@@ -30,6 +44,8 @@ message SettleTopUpRequest {
   string provider_name = 2;
   string charge_id = 3;
   bytes raw_payload = 4;
+  string signature = 5;
+  map<string, string> headers = 6;
 }
 
 message SettleTopUpResponse {

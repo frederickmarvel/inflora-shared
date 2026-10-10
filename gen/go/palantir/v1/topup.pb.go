@@ -34,8 +34,19 @@ type CreateTopUpRequest struct {
 	UserAgent         string                 `protobuf:"bytes,9,opt,name=user_agent,json=userAgent,proto3" json:"user_agent,omitempty"`
 	IdempotencyKey    string                 `protobuf:"bytes,10,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`
 	ExpiresAtUnix     int64                  `protobuf:"varint,11,opt,name=expires_at_unix,json=expiresAtUnix,proto3" json:"expires_at_unix,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	// Redirect URLs for the hosted payment page. Empty means the provider's
+	// defaults are used; the donor's browser returns here after paying.
+	SuccessReturnUrl    string `protobuf:"bytes,12,opt,name=success_return_url,json=successReturnUrl,proto3" json:"success_return_url,omitempty"`
+	FailureReturnUrl    string `protobuf:"bytes,13,opt,name=failure_return_url,json=failureReturnUrl,proto3" json:"failure_return_url,omitempty"`
+	ExpirationReturnUrl string `protobuf:"bytes,14,opt,name=expiration_return_url,json=expirationReturnUrl,proto3" json:"expiration_return_url,omitempty"`
+	// Human-readable donation description carried into the provider order
+	// (message, voice note, clip, call request, …).
+	Description string `protobuf:"bytes,15,opt,name=description,proto3" json:"description,omitempty"`
+	// Receipt email, carried into the provider order for refund/notification
+	// flows.
+	DonorEmail    string `protobuf:"bytes,16,opt,name=donor_email,json=donorEmail,proto3" json:"donor_email,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CreateTopUpRequest) Reset() {
@@ -145,12 +156,50 @@ func (x *CreateTopUpRequest) GetExpiresAtUnix() int64 {
 	return 0
 }
 
+func (x *CreateTopUpRequest) GetSuccessReturnUrl() string {
+	if x != nil {
+		return x.SuccessReturnUrl
+	}
+	return ""
+}
+
+func (x *CreateTopUpRequest) GetFailureReturnUrl() string {
+	if x != nil {
+		return x.FailureReturnUrl
+	}
+	return ""
+}
+
+func (x *CreateTopUpRequest) GetExpirationReturnUrl() string {
+	if x != nil {
+		return x.ExpirationReturnUrl
+	}
+	return ""
+}
+
+func (x *CreateTopUpRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *CreateTopUpRequest) GetDonorEmail() string {
+	if x != nil {
+		return x.DonorEmail
+	}
+	return ""
+}
+
 type CreateTopUpResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ChargeId      string                 `protobuf:"bytes,1,opt,name=charge_id,json=chargeId,proto3" json:"charge_id,omitempty"`
 	PaymentUrl    string                 `protobuf:"bytes,2,opt,name=payment_url,json=paymentUrl,proto3" json:"payment_url,omitempty"`
 	ProviderName  string                 `protobuf:"bytes,3,opt,name=provider_name,json=providerName,proto3" json:"provider_name,omitempty"`
 	ExpiresAtUnix int64                  `protobuf:"varint,4,opt,name=expires_at_unix,json=expiresAtUnix,proto3" json:"expires_at_unix,omitempty"`
+	// The method the provider session actually uses (e.g. "QRIS", "CARD",
+	// "REDIRECT"). Persisted verbatim; the caller must not guess it.
+	PaymentMethod string `protobuf:"bytes,5,opt,name=payment_method,json=paymentMethod,proto3" json:"payment_method,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -213,12 +262,21 @@ func (x *CreateTopUpResponse) GetExpiresAtUnix() int64 {
 	return 0
 }
 
+func (x *CreateTopUpResponse) GetPaymentMethod() string {
+	if x != nil {
+		return x.PaymentMethod
+	}
+	return ""
+}
+
 type SettleTopUpRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	ProviderEventId string                 `protobuf:"bytes,1,opt,name=provider_event_id,json=providerEventId,proto3" json:"provider_event_id,omitempty"`
 	ProviderName    string                 `protobuf:"bytes,2,opt,name=provider_name,json=providerName,proto3" json:"provider_name,omitempty"`
 	ChargeId        string                 `protobuf:"bytes,3,opt,name=charge_id,json=chargeId,proto3" json:"charge_id,omitempty"`
 	RawPayload      []byte                 `protobuf:"bytes,4,opt,name=raw_payload,json=rawPayload,proto3" json:"raw_payload,omitempty"`
+	Signature       string                 `protobuf:"bytes,5,opt,name=signature,proto3" json:"signature,omitempty"`
+	Headers         map[string]string      `protobuf:"bytes,6,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -277,6 +335,20 @@ func (x *SettleTopUpRequest) GetChargeId() string {
 func (x *SettleTopUpRequest) GetRawPayload() []byte {
 	if x != nil {
 		return x.RawPayload
+	}
+	return nil
+}
+
+func (x *SettleTopUpRequest) GetSignature() string {
+	if x != nil {
+		return x.Signature
+	}
+	return ""
+}
+
+func (x *SettleTopUpRequest) GetHeaders() map[string]string {
+	if x != nil {
+		return x.Headers
 	}
 	return nil
 }
@@ -361,7 +433,7 @@ var File_palantir_v1_topup_proto protoreflect.FileDescriptor
 
 const file_palantir_v1_topup_proto_rawDesc = "" +
 	"\n" +
-	"\x17palantir/v1/topup.proto\x12\x13inflora.palantir.v1\"\x98\x03\n" +
+	"\x17palantir/v1/topup.proto\x12\x13inflora.palantir.v1\"\xeb\x04\n" +
 	"\x12CreateTopUpRequest\x12.\n" +
 	"\x13saruman_donation_id\x18\x01 \x01(\tR\x11sarumanDonationId\x12\x1f\n" +
 	"\vstreamer_id\x18\x02 \x01(\tR\n" +
@@ -377,19 +449,31 @@ const file_palantir_v1_topup_proto_rawDesc = "" +
 	"user_agent\x18\t \x01(\tR\tuserAgent\x12'\n" +
 	"\x0fidempotency_key\x18\n" +
 	" \x01(\tR\x0eidempotencyKey\x12&\n" +
-	"\x0fexpires_at_unix\x18\v \x01(\x03R\rexpiresAtUnix\"\xa0\x01\n" +
+	"\x0fexpires_at_unix\x18\v \x01(\x03R\rexpiresAtUnix\x12,\n" +
+	"\x12success_return_url\x18\f \x01(\tR\x10successReturnUrl\x12,\n" +
+	"\x12failure_return_url\x18\r \x01(\tR\x10failureReturnUrl\x122\n" +
+	"\x15expiration_return_url\x18\x0e \x01(\tR\x13expirationReturnUrl\x12 \n" +
+	"\vdescription\x18\x0f \x01(\tR\vdescription\x12\x1f\n" +
+	"\vdonor_email\x18\x10 \x01(\tR\n" +
+	"donorEmail\"\xc7\x01\n" +
 	"\x13CreateTopUpResponse\x12\x1b\n" +
 	"\tcharge_id\x18\x01 \x01(\tR\bchargeId\x12\x1f\n" +
 	"\vpayment_url\x18\x02 \x01(\tR\n" +
 	"paymentUrl\x12#\n" +
 	"\rprovider_name\x18\x03 \x01(\tR\fproviderName\x12&\n" +
-	"\x0fexpires_at_unix\x18\x04 \x01(\x03R\rexpiresAtUnix\"\xa3\x01\n" +
+	"\x0fexpires_at_unix\x18\x04 \x01(\x03R\rexpiresAtUnix\x12%\n" +
+	"\x0epayment_method\x18\x05 \x01(\tR\rpaymentMethod\"\xcd\x02\n" +
 	"\x12SettleTopUpRequest\x12*\n" +
 	"\x11provider_event_id\x18\x01 \x01(\tR\x0fproviderEventId\x12#\n" +
 	"\rprovider_name\x18\x02 \x01(\tR\fproviderName\x12\x1b\n" +
 	"\tcharge_id\x18\x03 \x01(\tR\bchargeId\x12\x1f\n" +
 	"\vraw_payload\x18\x04 \x01(\fR\n" +
-	"rawPayload\"\xdb\x01\n" +
+	"rawPayload\x12\x1c\n" +
+	"\tsignature\x18\x05 \x01(\tR\tsignature\x12N\n" +
+	"\aheaders\x18\x06 \x03(\v24.inflora.palantir.v1.SettleTopUpRequest.HeadersEntryR\aheaders\x1a:\n" +
+	"\fHeadersEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xdb\x01\n" +
 	"\x13SettleTopUpResponse\x12\x1f\n" +
 	"\vdonation_id\x18\x01 \x01(\tR\n" +
 	"donationId\x122\n" +
@@ -413,23 +497,25 @@ func file_palantir_v1_topup_proto_rawDescGZIP() []byte {
 	return file_palantir_v1_topup_proto_rawDescData
 }
 
-var file_palantir_v1_topup_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_palantir_v1_topup_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_palantir_v1_topup_proto_goTypes = []any{
 	(*CreateTopUpRequest)(nil),  // 0: inflora.palantir.v1.CreateTopUpRequest
 	(*CreateTopUpResponse)(nil), // 1: inflora.palantir.v1.CreateTopUpResponse
 	(*SettleTopUpRequest)(nil),  // 2: inflora.palantir.v1.SettleTopUpRequest
 	(*SettleTopUpResponse)(nil), // 3: inflora.palantir.v1.SettleTopUpResponse
+	nil,                         // 4: inflora.palantir.v1.SettleTopUpRequest.HeadersEntry
 }
 var file_palantir_v1_topup_proto_depIdxs = []int32{
-	0, // 0: inflora.palantir.v1.TopUpService.CreateTopUp:input_type -> inflora.palantir.v1.CreateTopUpRequest
-	2, // 1: inflora.palantir.v1.TopUpService.SettleTopUp:input_type -> inflora.palantir.v1.SettleTopUpRequest
-	1, // 2: inflora.palantir.v1.TopUpService.CreateTopUp:output_type -> inflora.palantir.v1.CreateTopUpResponse
-	3, // 3: inflora.palantir.v1.TopUpService.SettleTopUp:output_type -> inflora.palantir.v1.SettleTopUpResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	4, // 0: inflora.palantir.v1.SettleTopUpRequest.headers:type_name -> inflora.palantir.v1.SettleTopUpRequest.HeadersEntry
+	0, // 1: inflora.palantir.v1.TopUpService.CreateTopUp:input_type -> inflora.palantir.v1.CreateTopUpRequest
+	2, // 2: inflora.palantir.v1.TopUpService.SettleTopUp:input_type -> inflora.palantir.v1.SettleTopUpRequest
+	1, // 3: inflora.palantir.v1.TopUpService.CreateTopUp:output_type -> inflora.palantir.v1.CreateTopUpResponse
+	3, // 4: inflora.palantir.v1.TopUpService.SettleTopUp:output_type -> inflora.palantir.v1.SettleTopUpResponse
+	3, // [3:5] is the sub-list for method output_type
+	1, // [1:3] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_palantir_v1_topup_proto_init() }
@@ -443,7 +529,7 @@ func file_palantir_v1_topup_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_palantir_v1_topup_proto_rawDesc), len(file_palantir_v1_topup_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

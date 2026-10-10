@@ -21,10 +21,20 @@ type CreateTopUpRequest struct {
 	AmountIDR                                                  int64
 	PaymentMethod                                              PaymentMethod
 	ChannelCode, DonorName, DonorEmail, CallbackURL, RequestID string
+	// Redirect return URLs for the hosted payment page. Providers that need
+	// them (Pivot REDIRECT) read these; others ignore them.
+	SuccessReturnURL, FailureReturnURL, ExpirationURL string
+	// Description is the human-readable donation summary carried into the
+	// provider order.
+	Description string
 }
 type CreateTopUpResult struct {
 	ChargeID, PaymentURL, QRString, VANumber, EWalletDeepLink, Status string
-	ExpiresAt                                                         time.Time
+	// PaymentMethod is the method the provider's session actually uses, e.g.
+	// "QRIS" or "REDIRECT" (a hosted list-of-payment UI). Providers set it;
+	// callers persist it without guessing.
+	PaymentMethod string
+	ExpiresAt     time.Time
 }
 type CreateWithdrawalRequest struct {
 	ExternalID                                 string
