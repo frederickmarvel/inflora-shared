@@ -25,8 +25,29 @@ type DonationIntentCreatedEvent struct {
 	ClientIP             string    `json:"client_ip,omitempty"`
 	UserAgent            string    `json:"user_agent,omitempty"`
 	CaptchaToken         string    `json:"captcha_token,omitempty"`
-	ExpiresAt            time.Time `json:"expires_at"`
-	CreatedAt            time.Time `json:"created_at"`
+	// Rich-intent fields (CONTRACT_DRIFT D-031/D-037). Optional: legacy donors
+	// are unaffected.
+	LiveSessionID *string            `json:"live_session_id,omitempty"`
+	WidgetID      string             `json:"widget_id,omitempty"`
+	Quantity      *int               `json:"quantity,omitempty"`
+	Tier          string             `json:"tier,omitempty"`
+	Media         *DonationMediaEvent `json:"media,omitempty"`
+	Call          *DonationCallEvent  `json:"call,omitempty"`
+	ExpiresAt     time.Time          `json:"expires_at"`
+	CreatedAt     time.Time          `json:"created_at"`
+}
+
+// DonationMediaEvent is the media-share attachment on a rich tip.
+type DonationMediaEvent struct {
+	Type       string `json:"type"`
+	Title      string `json:"title,omitempty"`
+	DurationMS int    `json:"duration_ms,omitempty"`
+}
+
+// DonationCallEvent is the call attachment on a rich tip.
+type DonationCallEvent struct {
+	Topic string `json:"topic,omitempty"`
+	Mode  string `json:"mode,omitempty"`
 }
 
 type DonationChargedEvent struct {
