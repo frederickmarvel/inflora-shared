@@ -23,6 +23,35 @@ func TestDonationChargedEventRoundTrip(t *testing.T) {
 	}
 }
 
+func TestDonationIntentCreatedEventDisplayPricingJSON(t *testing.T) {
+	t.Parallel()
+
+	b, err := json.Marshal(DonationIntentCreatedEvent{
+		DisplayRateIDRPerSec: 1000,
+		DisplayMinSec:        5,
+		DisplayMaxSec:        60,
+		DisplayDurationSec:   10,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got map[string]any
+	if err := json.Unmarshal(b, &got); err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]float64{
+		"display_rate_idr_per_sec": 1000,
+		"display_min_sec":          5,
+		"display_max_sec":          60,
+		"display_duration_sec":     10,
+	}
+	for key, value := range want {
+		if got[key] != value {
+			t.Fatalf("%s = %#v, want %#v", key, got[key], value)
+		}
+	}
+}
+
 func TestFundHoldCreatedNullableFields(t *testing.T) {
 	b, err := json.Marshal(FundHoldCreatedEvent{HoldID: "hold", TargetType: "STREAMER", StreamerID: "streamer"})
 	if err != nil {

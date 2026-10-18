@@ -219,6 +219,8 @@ type SettleTopUpRequest struct {
 	ProviderName    string                 `protobuf:"bytes,2,opt,name=provider_name,json=providerName,proto3" json:"provider_name,omitempty"`
 	ChargeId        string                 `protobuf:"bytes,3,opt,name=charge_id,json=chargeId,proto3" json:"charge_id,omitempty"`
 	RawPayload      []byte                 `protobuf:"bytes,4,opt,name=raw_payload,json=rawPayload,proto3" json:"raw_payload,omitempty"`
+	Signature       string                 `protobuf:"bytes,5,opt,name=signature,proto3" json:"signature,omitempty"`
+	Headers         map[string]string      `protobuf:"bytes,6,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -277,6 +279,20 @@ func (x *SettleTopUpRequest) GetChargeId() string {
 func (x *SettleTopUpRequest) GetRawPayload() []byte {
 	if x != nil {
 		return x.RawPayload
+	}
+	return nil
+}
+
+func (x *SettleTopUpRequest) GetSignature() string {
+	if x != nil {
+		return x.Signature
+	}
+	return ""
+}
+
+func (x *SettleTopUpRequest) GetHeaders() map[string]string {
+	if x != nil {
+		return x.Headers
 	}
 	return nil
 }
@@ -383,13 +399,18 @@ const file_palantir_v1_topup_proto_rawDesc = "" +
 	"\vpayment_url\x18\x02 \x01(\tR\n" +
 	"paymentUrl\x12#\n" +
 	"\rprovider_name\x18\x03 \x01(\tR\fproviderName\x12&\n" +
-	"\x0fexpires_at_unix\x18\x04 \x01(\x03R\rexpiresAtUnix\"\xa3\x01\n" +
+	"\x0fexpires_at_unix\x18\x04 \x01(\x03R\rexpiresAtUnix\"\xcd\x02\n" +
 	"\x12SettleTopUpRequest\x12*\n" +
 	"\x11provider_event_id\x18\x01 \x01(\tR\x0fproviderEventId\x12#\n" +
 	"\rprovider_name\x18\x02 \x01(\tR\fproviderName\x12\x1b\n" +
 	"\tcharge_id\x18\x03 \x01(\tR\bchargeId\x12\x1f\n" +
 	"\vraw_payload\x18\x04 \x01(\fR\n" +
-	"rawPayload\"\xdb\x01\n" +
+	"rawPayload\x12\x1c\n" +
+	"\tsignature\x18\x05 \x01(\tR\tsignature\x12N\n" +
+	"\aheaders\x18\x06 \x03(\v24.inflora.palantir.v1.SettleTopUpRequest.HeadersEntryR\aheaders\x1a:\n" +
+	"\fHeadersEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xdb\x01\n" +
 	"\x13SettleTopUpResponse\x12\x1f\n" +
 	"\vdonation_id\x18\x01 \x01(\tR\n" +
 	"donationId\x122\n" +
@@ -413,23 +434,25 @@ func file_palantir_v1_topup_proto_rawDescGZIP() []byte {
 	return file_palantir_v1_topup_proto_rawDescData
 }
 
-var file_palantir_v1_topup_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_palantir_v1_topup_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_palantir_v1_topup_proto_goTypes = []any{
 	(*CreateTopUpRequest)(nil),  // 0: inflora.palantir.v1.CreateTopUpRequest
 	(*CreateTopUpResponse)(nil), // 1: inflora.palantir.v1.CreateTopUpResponse
 	(*SettleTopUpRequest)(nil),  // 2: inflora.palantir.v1.SettleTopUpRequest
 	(*SettleTopUpResponse)(nil), // 3: inflora.palantir.v1.SettleTopUpResponse
+	nil,                         // 4: inflora.palantir.v1.SettleTopUpRequest.HeadersEntry
 }
 var file_palantir_v1_topup_proto_depIdxs = []int32{
-	0, // 0: inflora.palantir.v1.TopUpService.CreateTopUp:input_type -> inflora.palantir.v1.CreateTopUpRequest
-	2, // 1: inflora.palantir.v1.TopUpService.SettleTopUp:input_type -> inflora.palantir.v1.SettleTopUpRequest
-	1, // 2: inflora.palantir.v1.TopUpService.CreateTopUp:output_type -> inflora.palantir.v1.CreateTopUpResponse
-	3, // 3: inflora.palantir.v1.TopUpService.SettleTopUp:output_type -> inflora.palantir.v1.SettleTopUpResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	4, // 0: inflora.palantir.v1.SettleTopUpRequest.headers:type_name -> inflora.palantir.v1.SettleTopUpRequest.HeadersEntry
+	0, // 1: inflora.palantir.v1.TopUpService.CreateTopUp:input_type -> inflora.palantir.v1.CreateTopUpRequest
+	2, // 2: inflora.palantir.v1.TopUpService.SettleTopUp:input_type -> inflora.palantir.v1.SettleTopUpRequest
+	1, // 3: inflora.palantir.v1.TopUpService.CreateTopUp:output_type -> inflora.palantir.v1.CreateTopUpResponse
+	3, // 4: inflora.palantir.v1.TopUpService.SettleTopUp:output_type -> inflora.palantir.v1.SettleTopUpResponse
+	3, // [3:5] is the sub-list for method output_type
+	1, // [1:3] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_palantir_v1_topup_proto_init() }
@@ -443,7 +466,7 @@ func file_palantir_v1_topup_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_palantir_v1_topup_proto_rawDesc), len(file_palantir_v1_topup_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   4,
+			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

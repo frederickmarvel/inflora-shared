@@ -34,6 +34,22 @@ const (
 	FraudFlagged            = "fraud.flagged.v1"
 )
 
+// DefaultStreamSubjects are the concrete subject prefixes the shared JetStream
+// stream captures. It must never include bare ">": a stream that captures
+// every subject (including $JS.* internals) forces NoAck=true, so JetStream
+// never sends publish acknowledgements and every synchronous PublishMsg hangs
+// until its timeout. "foo.>" prefixes are fully ackable, so these namespace
+// prefixes cover every domain event (see the topic constants) without bare ">".
+var DefaultStreamSubjects = []string{
+	"donation.>",
+	"payout.>",
+	"streamer.>",
+	"overlay.>",
+	"fund_hold.>",
+	"fraud.>",
+	"pg.gateway.topup.>",
+}
+
 var ErrPublisherClosed = errors.New("events: publisher closed")
 var ErrDuplicate = errors.New("events: duplicate event")
 

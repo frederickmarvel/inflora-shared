@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package inflora.palantir.v1;
+
+option go_package = "github.com/frederickmarvel/inflora-shared/gen/go/palantir/v1;palantirv1";
+
+// OverrideDecision is the trusted admin instruction applied to a stuck
+// gateway top-up. An override is only meaningful while the top-up is still
+// pending; it reuses the exact same provider-result event pipeline as a real
+// webhook so the ledger and OBS overlay stay consistent.
+enum OverrideDecision {
+  OVERRIDE_DECISION_UNSPECIFIED = 0;
+  OVERRIDE_SUCCESS = 1;  // force CAPTURED -> donation.charged.v1 -> overlay
+  OVERRIDE_FAILURE = 2;  // force FAILED   -> donation.failed.v1
+}
+
+message OverrideDonationRequest {
+  string donation_id = 1;
+  OverrideDecision decision = 2;
+  string reason = 3;  // free-text audit rationale (required)
+  string actor = 4;   // admin user id (audit)
+}
+
+message OverrideDonationResponse {
+  string donation_id = 1;
+  string status = 2;             // resulting gateway status: CAPTURED | FAILED
+  bool already_terminal = 3;     // true when the override was a no-op
+}
+
+// AdminService carries trusted, auditable operations that originate from the
+// admin facade (Tolkien) rather than a provider webhook.
+service AdminService {
+  rpc OverrideDonation(OverrideDonationRequest) returns (OverrideDonationResponse);
+}

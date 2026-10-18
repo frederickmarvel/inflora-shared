@@ -13,6 +13,7 @@ import (
 const (
 	SessionTokenPrefix = "sk_"
 	OverlayTokenPrefix = "ok_"
+	AdminTokenPrefix   = "ak_"
 	TokenRandomBytes   = 32
 	TokenHashCost      = 12
 )
@@ -27,6 +28,10 @@ func GenerateSessionToken() (string, error) { return generateToken(SessionTokenP
 // of cryptographically secure randomness.
 func GenerateOverlayToken() (string, error) { return generateToken(OverlayTokenPrefix) }
 
+// GenerateAdminToken returns an opaque admin-session token containing 256 bits
+// of cryptographically secure randomness.
+func GenerateAdminToken() (string, error) { return generateToken(AdminTokenPrefix) }
+
 func generateToken(prefix string) (string, error) {
 	random := make([]byte, TokenRandomBytes)
 	if _, err := rand.Read(random); err != nil {
@@ -38,6 +43,7 @@ func generateToken(prefix string) (string, error) {
 // ValidSessionToken and ValidOverlayToken validate the frozen wire format.
 func ValidSessionToken(token string) bool { return validToken(token, SessionTokenPrefix) }
 func ValidOverlayToken(token string) bool { return validToken(token, OverlayTokenPrefix) }
+func ValidAdminToken(token string) bool   { return validToken(token, AdminTokenPrefix) }
 
 func validToken(token, prefix string) bool {
 	if !strings.HasPrefix(token, prefix) {
@@ -49,7 +55,7 @@ func validToken(token, prefix string) bool {
 
 // TokenLast4 returns the last four characters of the base64url portion.
 func TokenLast4(token string) (string, error) {
-	if !ValidSessionToken(token) && !ValidOverlayToken(token) {
+	if !ValidSessionToken(token) && !ValidOverlayToken(token) && !ValidAdminToken(token) {
 		return "", ErrInvalidTokenFormat
 	}
 	return token[len(token)-4:], nil
@@ -59,7 +65,7 @@ func TokenLast4(token string) (string, error) {
 // frozen storage contract. It rejects malformed tokens to prevent accidentally
 // storing passwords, API keys, or unprefixed values in token_hash.
 func HashToken(token string) (string, error) {
-	if !ValidSessionToken(token) && !ValidOverlayToken(token) {
+	if !ValidSessionToken(token) && !ValidOverlayToken(token) && !ValidAdminToken(token) {
 		return "", ErrInvalidTokenFormat
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(token), TokenHashCost)
@@ -72,7 +78,7 @@ func HashToken(token string) (string, error) {
 // VerifyToken performs bcrypt verification. A mismatch is not an operational
 // error: it returns (false, nil). Malformed hashes are returned as errors.
 func VerifyToken(token, hash string) (bool, error) {
-	if !ValidSessionToken(token) && !ValidOverlayToken(token) {
+	if !ValidSessionToken(token) && !ValidOverlayToken(token) && !ValidAdminToken(token) {
 		return false, nil
 	}
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(token))

@@ -30,6 +30,8 @@ message SettleTopUpRequest {
   string provider_name = 2;
   string charge_id = 3;
   bytes raw_payload = 4;
+  string signature = 5;
+  map<string, string> headers = 6;
 }
 
 message SettleTopUpResponse {

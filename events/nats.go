@@ -105,7 +105,11 @@ func (s *NATSSubscriber) Subscribe(ctx context.Context, subject, durable string,
 			if ctx.Err() != nil {
 				return ctx.Err()
 			}
-			if errors.Is(fetchErr, nats.ErrTimeout) {
+			// The nats Go client returns a wrapped context.DeadlineExceeded
+			// (not nats.ErrTimeout) when its default fetch timeout fires on a
+			// context without an explicit deadline. Treat it as a normal idle
+			// tick and keep the consumer loop alive.
+			if errors.Is(fetchErr, nats.ErrTimeout) || errors.Is(fetchErr, context.DeadlineExceeded) {
 				continue
 			}
 			return fmt.Errorf("events: fetch: %w", fetchErr)
@@ -159,7 +163,19 @@ func connect(cfg NATSConfig) (*nats.Conn, nats.JetStreamContext, error) {
 	}
 	subjects := cfg.Subjects
 	if len(subjects) == 0 {
-		subjects = []string{">"}
+		subjects = DefaultStreamSubjects
+	}
+	// Normalize a bare ">" catch-all to the platform's concrete namespace
+	// prefixes. A stream that captures ">" (or resolves to it) must be created
+	// with NoAck=true, and a NoAck stream never sends publish acknowledgements
+	// — which breaks the synchronous PublishMsg below. The "*.>" namespace
+	// prefixes in DefaultStreamSubjects are fully ackable, so ">" is never a
+	// valid subject here and is rewritten to the platform default set.
+	for _, s := range subjects {
+		if s == ">" {
+			subjects = DefaultStreamSubjects
+			break
+		}
 	}
 	if _, err = js.StreamInfo(streamName(cfg)); err != nil {
 		if !errors.Is(err, nats.ErrStreamNotFound) {
