@@ -52,6 +52,33 @@ func TestDonationIntentCreatedEventDisplayPricingJSON(t *testing.T) {
 	}
 }
 
+func TestDonationReviewedEventRoundTrip(t *testing.T) {
+	airedAt := time.Date(2026, 10, 18, 9, 30, 0, 0, time.UTC)
+	want := DonationReviewedEvent{
+		DonationID: "donation", IntentID: "intent", StreamerID: "streamer",
+		ReviewStatus: "REJECTED", Reviewer: "streamer", FlagReason: "Contains a link",
+		ReviewedAt: time.Date(2026, 10, 18, 9, 35, 0, 0, time.UTC), AiredAt: &airedAt,
+		AmountIDR: 50000, MDRIDR: 70, GrossChargedIDR: 50070, PlatformFeeIDR: 5000, NetIDR: 45000,
+		DonorDisplayName: "Andi", IsAnonymous: false, Message: "visit www.scam.gg",
+		DisplayDurationSec: 25, SettlementStatus: "PENDING", PaymentMethod: "QRIS",
+	}
+	b, err := json.Marshal(want)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got DonationReviewedEvent
+	if err = json.Unmarshal(b, &got); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Fatalf("round trip mismatch\nwant: %#v\n got: %#v", want, got)
+	}
+	// Rejection is a takedown: wire payload must always carry the terminal status.
+	if !strings.Contains(string(b), `"review_status":"REJECTED"`) {
+		t.Fatalf("missing review_status in %s", b)
+	}
+}
+
 func TestFundHoldCreatedNullableFields(t *testing.T) {
 	b, err := json.Marshal(FundHoldCreatedEvent{HoldID: "hold", TargetType: "STREAMER", StreamerID: "streamer"})
 	if err != nil {

@@ -18,6 +18,7 @@ const (
 	DonationSettled         = "donation.settled.v1"
 	DonationFailed          = "donation.failed.v1"
 	DonationRefunded        = "donation.refunded.v1"
+	DonationReviewed        = "donation.reviewed.v1"
 	DonationReceiptSent     = "donation.receipt_sent.v1"
 	PayoutRequested         = "payout.requested.v1"
 	PayoutBatched           = "payout.batched.v1"

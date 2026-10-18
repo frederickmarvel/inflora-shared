@@ -78,6 +78,46 @@ type DonationChargedEvent struct {
 	LedgerCorrelationID string     `json:"ledger_correlation_id"`
 	CapturedAt          time.Time  `json:"captured_at"`
 	ExpectedSettledAt   *time.Time `json:"expected_settled_at,omitempty"`
+	// Additive review state (CONTRACT_DRIFT D-038, owner-amended 2026-10-18):
+	// review_status is "APPROVED" for every charged donation (airing is never
+	// delayed); review_flag_reason carries the moderation badge (may be empty).
+	// Old producers leave them empty — nothing changes for those rows.
+	ReviewStatus     string `json:"review_status,omitempty"`
+	ReviewFlagReason string `json:"review_flag_reason,omitempty"`
+}
+
+// DonationReviewedEvent carries a creator decision on an already-aired
+// donation (CONTRACT_DRIFT D-038): ReviewStatus is "APPROVED" (idempotent
+// confirm, airing unaffected) or "REJECTED" (replay-safe TAKEDOWN — the frame
+// is removed from the overlay projection; terminal, no restore).
+// Charge-initialized APPROVED rows never emit it: the charged event is their
+// only airing signal. The display subset mirrors DonationChargedEvent so
+// consumers can act without a DB read.
+type DonationReviewedEvent struct {
+	DonationID         string     `json:"donation_id"`
+	IntentID           string     `json:"intent_id"`
+	StreamerID         string     `json:"streamer_id"`
+	ReviewStatus       string     `json:"review_status"`
+	Reviewer           string     `json:"reviewer"`
+	FlagReason         string     `json:"flag_reason,omitempty"`
+	ReviewedAt         time.Time  `json:"reviewed_at"`
+	AiredAt            *time.Time `json:"aired_at,omitempty"`
+	AmountIDR          int64      `json:"amount_idr"`
+	MDRIDR             int64      `json:"mdr_idr"`
+	GrossChargedIDR    int64      `json:"gross_charged_idr"`
+	PlatformFeeIDR     int64      `json:"platform_fee_idr"`
+	NetIDR             int64      `json:"net_idr"`
+	DonorDisplayName   string     `json:"donor_display_name,omitempty"`
+	IsAnonymous        bool       `json:"is_anonymous"`
+	Message            string     `json:"message,omitempty"`
+	VoiceURL           string     `json:"voice_url,omitempty"`
+	VoiceDurationSec   int        `json:"voice_duration_sec,omitempty"`
+	YouTubeURL         string     `json:"youtube_url,omitempty"`
+	YouTubeStartSec    int        `json:"youtube_start_sec,omitempty"`
+	YouTubeEndSec      int        `json:"youtube_end_sec,omitempty"`
+	DisplayDurationSec int        `json:"display_duration_sec"`
+	SettlementStatus   string     `json:"settlement_status"`
+	PaymentMethod      string     `json:"payment_method"`
 }
 
 type DonationSettledEvent struct {

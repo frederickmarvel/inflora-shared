@@ -35,8 +35,8 @@ func TestNewEnvelopeRejectsNonObjectPayload(t *testing.T) {
 }
 
 func TestCatalogAndSubject(t *testing.T) {
-	topics := []string{DonationIntentCreated, DonationCharged, DonationSettled, DonationFailed, DonationRefunded, DonationReceiptSent, PayoutRequested, PayoutBatched, PayoutSettled, PayoutFailed, PayoutBatchExecuted, PayoutBatchCompleted, PayoutBatchFailed, StreamerRegistered, StreamerSettingsUpdated, OverlayTokenRotated, FundHoldCreated, FundHoldReleased, FraudFlagged}
-	if len(topics) != 19 {
+	topics := []string{DonationIntentCreated, DonationCharged, DonationSettled, DonationFailed, DonationRefunded, DonationReviewed, DonationReceiptSent, PayoutRequested, PayoutBatched, PayoutSettled, PayoutFailed, PayoutBatchExecuted, PayoutBatchCompleted, PayoutBatchFailed, StreamerRegistered, StreamerSettingsUpdated, OverlayTokenRotated, FundHoldCreated, FundHoldReleased, FraudFlagged}
+	if len(topics) != 20 {
 		t.Fatalf("got %d catalog topics", len(topics))
 	}
 	seen := map[string]bool{}
@@ -47,6 +47,9 @@ func TestCatalogAndSubject(t *testing.T) {
 		seen[topic] = true
 	}
 	if got := Subject(DonationCharged, "streamer-id"); got != "donation.charged.v1.streamer-id" {
+		t.Fatal(got)
+	}
+	if got := Subject(DonationReviewed, "streamer-id"); got != "donation.reviewed.v1.streamer-id" {
 		t.Fatal(got)
 	}
 }

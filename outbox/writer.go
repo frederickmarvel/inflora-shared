@@ -113,6 +113,41 @@ func EnqueueRaw(ctx context.Context, tx *sql.Tx, params RawParams) (uuid.UUID, e
 	return params.EventID, nil
 }
 
+// EnqueueRawIdempotent is EnqueueRaw with INSERT ... ON CONFLICT (event_id)
+// DO NOTHING: a heal-lane re-enqueue carrying the original deterministic
+// event id can never collide with an existing row — the duplicate insert is
+// silently ignored and the existing id is returned.
+func EnqueueRawIdempotent(ctx context.Context, tx *sql.Tx, params RawParams) (uuid.UUID, error) {
+	if tx == nil {
+		return uuid.Nil, ErrTxRequired
+	}
+	if params.EventID == uuid.Nil {
+		params.EventID = uuid.New()
+	}
+	if params.OccurredAt.IsZero() {
+		params.OccurredAt = time.Now().UTC()
+	}
+	if params.AvailableAt.IsZero() {
+		params.AvailableAt = params.OccurredAt
+	}
+	if !json.Valid(params.Envelope) || len(params.Envelope) == 0 || params.Envelope[0] != '{' {
+		return uuid.Nil, fmt.Errorf("outbox: envelope must be a non-null JSON object")
+	}
+	if _, err := tx.ExecContext(ctx, `
+		INSERT INTO outbox_events (
+			event_id, producer, event_type, event_version, aggregate_type, aggregate_id,
+			streamer_id, subject, envelope, occurred_at, available_at
+		) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+		ON CONFLICT (event_id) DO NOTHING
+	`,
+		params.EventID, params.Producer, params.EventType, params.EventVersion, params.AggregateType, params.AggregateID,
+		params.StreamerID, params.Subject, params.Envelope, params.OccurredAt, params.AvailableAt,
+	); err != nil {
+		return uuid.Nil, fmt.Errorf("outbox: insert raw idempotent: %w", err)
+	}
+	return params.EventID, nil
+}
+
 // RawParams is the input shape for EnqueueRaw.
 type RawParams struct {
 	EventID       uuid.UUID
