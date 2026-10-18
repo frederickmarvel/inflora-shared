@@ -177,6 +177,11 @@ type bucket struct {
 	count   int
 }
 
+// maxRateLimiterKeys bounds map growth between sweeps. Expired buckets are
+// swept lazily when a new key would push the map past this size, so an
+// attacker rotating keys cannot grow it without bound.
+const maxRateLimiterKeys = 10_000
+
 func NewRateLimiter(limit int, window time.Duration) *RateLimiter {
 	if limit < 1 {
 		limit = 1
@@ -192,6 +197,9 @@ func (l *RateLimiter) Allow(key string) bool {
 	defer l.mu.Unlock()
 	b := l.clients[key]
 	if b == nil || now.Sub(b.started) >= l.window {
+		if b == nil && len(l.clients) >= maxRateLimiterKeys {
+			l.sweep(now)
+		}
 		l.clients[key] = &bucket{started: now, count: 1}
 		return true
 	}
@@ -200,6 +208,13 @@ func (l *RateLimiter) Allow(key string) bool {
 	}
 	b.count++
 	return true
+}
+func (l *RateLimiter) sweep(now time.Time) {
+	for k, b := range l.clients {
+		if now.Sub(b.started) >= l.window {
+			delete(l.clients, k)
+		}
+	}
 }
 func (l *RateLimiter) Middleware(keyFn func(*http.Request) string) func(http.Handler) http.Handler {
 	if keyFn == nil {
