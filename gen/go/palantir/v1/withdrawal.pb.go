@@ -162,8 +162,15 @@ type SettleWithdrawalRequest struct {
 	ProviderPayoutId string                 `protobuf:"bytes,1,opt,name=provider_payout_id,json=providerPayoutId,proto3" json:"provider_payout_id,omitempty"`
 	ProviderEventId  string                 `protobuf:"bytes,2,opt,name=provider_event_id,json=providerEventId,proto3" json:"provider_event_id,omitempty"`
 	RawPayload       []byte                 `protobuf:"bytes,3,opt,name=raw_payload,json=rawPayload,proto3" json:"raw_payload,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	// VerifyWebhook parity (T15, additive): the ingest webhook proxy forwards
+	// the provider name, signature and headers so Palantir verifies and dedupes
+	// payout webhooks exactly like top-up webhooks.
+	ProviderName    string            `protobuf:"bytes,4,opt,name=provider_name,json=providerName,proto3" json:"provider_name,omitempty"`
+	Signature       string            `protobuf:"bytes,5,opt,name=signature,proto3" json:"signature,omitempty"`
+	Headers         map[string]string `protobuf:"bytes,6,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	SarumanPayoutId string            `protobuf:"bytes,7,opt,name=saruman_payout_id,json=sarumanPayoutId,proto3" json:"saruman_payout_id,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
 func (x *SettleWithdrawalRequest) Reset() {
@@ -215,6 +222,34 @@ func (x *SettleWithdrawalRequest) GetRawPayload() []byte {
 		return x.RawPayload
 	}
 	return nil
+}
+
+func (x *SettleWithdrawalRequest) GetProviderName() string {
+	if x != nil {
+		return x.ProviderName
+	}
+	return ""
+}
+
+func (x *SettleWithdrawalRequest) GetSignature() string {
+	if x != nil {
+		return x.Signature
+	}
+	return ""
+}
+
+func (x *SettleWithdrawalRequest) GetHeaders() map[string]string {
+	if x != nil {
+		return x.Headers
+	}
+	return nil
+}
+
+func (x *SettleWithdrawalRequest) GetSarumanPayoutId() string {
+	if x != nil {
+		return x.SarumanPayoutId
+	}
+	return ""
 }
 
 type SettleWithdrawalResponse struct {
@@ -440,12 +475,19 @@ const file_palantir_v1_withdrawal_proto_rawDesc = "" +
 	"\x11requested_at_unix\x18\x06 \x01(\x03R\x0frequestedAtUnix\"`\n" +
 	"\x18CreateWithdrawalResponse\x12,\n" +
 	"\x12provider_payout_id\x18\x01 \x01(\tR\x10providerPayoutId\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\"\x94\x01\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\"\x94\x03\n" +
 	"\x17SettleWithdrawalRequest\x12,\n" +
 	"\x12provider_payout_id\x18\x01 \x01(\tR\x10providerPayoutId\x12*\n" +
 	"\x11provider_event_id\x18\x02 \x01(\tR\x0fproviderEventId\x12\x1f\n" +
 	"\vraw_payload\x18\x03 \x01(\fR\n" +
-	"rawPayload\"\x99\x01\n" +
+	"rawPayload\x12#\n" +
+	"\rprovider_name\x18\x04 \x01(\tR\fproviderName\x12\x1c\n" +
+	"\tsignature\x18\x05 \x01(\tR\tsignature\x12S\n" +
+	"\aheaders\x18\x06 \x03(\v29.inflora.palantir.v1.SettleWithdrawalRequest.HeadersEntryR\aheaders\x12*\n" +
+	"\x11saruman_payout_id\x18\a \x01(\tR\x0fsarumanPayoutId\x1a:\n" +
+	"\fHeadersEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x99\x01\n" +
 	"\x18SettleWithdrawalResponse\x12\x1b\n" +
 	"\tpayout_id\x18\x01 \x01(\tR\bpayoutId\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12!\n" +
@@ -478,7 +520,7 @@ func file_palantir_v1_withdrawal_proto_rawDescGZIP() []byte {
 	return file_palantir_v1_withdrawal_proto_rawDescData
 }
 
-var file_palantir_v1_withdrawal_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_palantir_v1_withdrawal_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_palantir_v1_withdrawal_proto_goTypes = []any{
 	(*CreateWithdrawalRequest)(nil),     // 0: inflora.palantir.v1.CreateWithdrawalRequest
 	(*CreateWithdrawalResponse)(nil),    // 1: inflora.palantir.v1.CreateWithdrawalResponse
@@ -486,19 +528,21 @@ var file_palantir_v1_withdrawal_proto_goTypes = []any{
 	(*SettleWithdrawalResponse)(nil),    // 3: inflora.palantir.v1.SettleWithdrawalResponse
 	(*GetWithdrawalStatusRequest)(nil),  // 4: inflora.palantir.v1.GetWithdrawalStatusRequest
 	(*GetWithdrawalStatusResponse)(nil), // 5: inflora.palantir.v1.GetWithdrawalStatusResponse
+	nil,                                 // 6: inflora.palantir.v1.SettleWithdrawalRequest.HeadersEntry
 }
 var file_palantir_v1_withdrawal_proto_depIdxs = []int32{
-	0, // 0: inflora.palantir.v1.WithdrawalService.CreateWithdrawal:input_type -> inflora.palantir.v1.CreateWithdrawalRequest
-	2, // 1: inflora.palantir.v1.WithdrawalService.SettleWithdrawal:input_type -> inflora.palantir.v1.SettleWithdrawalRequest
-	4, // 2: inflora.palantir.v1.WithdrawalService.GetWithdrawalStatus:input_type -> inflora.palantir.v1.GetWithdrawalStatusRequest
-	1, // 3: inflora.palantir.v1.WithdrawalService.CreateWithdrawal:output_type -> inflora.palantir.v1.CreateWithdrawalResponse
-	3, // 4: inflora.palantir.v1.WithdrawalService.SettleWithdrawal:output_type -> inflora.palantir.v1.SettleWithdrawalResponse
-	5, // 5: inflora.palantir.v1.WithdrawalService.GetWithdrawalStatus:output_type -> inflora.palantir.v1.GetWithdrawalStatusResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	6, // 0: inflora.palantir.v1.SettleWithdrawalRequest.headers:type_name -> inflora.palantir.v1.SettleWithdrawalRequest.HeadersEntry
+	0, // 1: inflora.palantir.v1.WithdrawalService.CreateWithdrawal:input_type -> inflora.palantir.v1.CreateWithdrawalRequest
+	2, // 2: inflora.palantir.v1.WithdrawalService.SettleWithdrawal:input_type -> inflora.palantir.v1.SettleWithdrawalRequest
+	4, // 3: inflora.palantir.v1.WithdrawalService.GetWithdrawalStatus:input_type -> inflora.palantir.v1.GetWithdrawalStatusRequest
+	1, // 4: inflora.palantir.v1.WithdrawalService.CreateWithdrawal:output_type -> inflora.palantir.v1.CreateWithdrawalResponse
+	3, // 5: inflora.palantir.v1.WithdrawalService.SettleWithdrawal:output_type -> inflora.palantir.v1.SettleWithdrawalResponse
+	5, // 6: inflora.palantir.v1.WithdrawalService.GetWithdrawalStatus:output_type -> inflora.palantir.v1.GetWithdrawalStatusResponse
+	4, // [4:7] is the sub-list for method output_type
+	1, // [1:4] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_palantir_v1_withdrawal_proto_init() }
@@ -512,7 +556,7 @@ func file_palantir_v1_withdrawal_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_palantir_v1_withdrawal_proto_rawDesc), len(file_palantir_v1_withdrawal_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

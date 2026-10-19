@@ -64,6 +64,13 @@ func (c *Client) CreateWithdrawal(ctx context.Context, r provider.CreateWithdraw
 	err := c.post(ctx, "/v1/payouts", r, &x)
 	return provider.CreateWithdrawalResult{WithdrawalID: x.ID, Status: x.Status}, err
 }
+
+// GetWithdrawalStatus is deliberately unimplemented for Midtrans IRIS at
+// Phase C (D-055): the IRIS payout API exposes no reliable status endpoint,
+// so the sweep + NEEDS_REVIEW flow is the designated fallback.
+func (c *Client) GetWithdrawalStatus(context.Context, provider.GetWithdrawalStatusRequest) (provider.GetWithdrawalStatusResult, error) {
+	return provider.GetWithdrawalStatusResult{}, provider.ErrNotImplemented
+}
 func (c *Client) CreateRefund(ctx context.Context, r provider.CreateRefundRequest) (provider.CreateRefundResult, error) {
 	var x struct {
 		RefundKey string `json:"refund_key"`

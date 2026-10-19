@@ -29,6 +29,14 @@ func (s *Stub) CreateTopUp(_ context.Context, r provider.CreateTopUpRequest) (pr
 func (s *Stub) CreateWithdrawal(_ context.Context, r provider.CreateWithdrawalRequest) (provider.CreateWithdrawalResult, error) {
 	return provider.CreateWithdrawalResult{WithdrawalID: id("withdrawal", r.ExternalID+":"+r.RequestID), Status: "PROCESSING"}, nil
 }
+
+// GetWithdrawalStatus implements D-055 for the pivot stub: the stub holds no
+// payout state, so the honest answer is PROCESSING. Under the dev autosettle
+// flag the palantir server short-circuits this call and derives COMPLETED
+// from its own mirror row instead.
+func (s *Stub) GetWithdrawalStatus(_ context.Context, r provider.GetWithdrawalStatusRequest) (provider.GetWithdrawalStatusResult, error) {
+	return provider.GetWithdrawalStatusResult{Status: "PROCESSING"}, nil
+}
 func (s *Stub) CreateRefund(_ context.Context, r provider.CreateRefundRequest) (provider.CreateRefundResult, error) {
 	return provider.CreateRefundResult{RefundID: id("refund", r.ExternalID+":"+r.RequestID), Status: "PROCESSING"}, nil
 }

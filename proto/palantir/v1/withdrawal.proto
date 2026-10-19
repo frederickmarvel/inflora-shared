@@ -22,6 +22,13 @@ message SettleWithdrawalRequest {
   string provider_payout_id = 1;
   string provider_event_id = 2;
   bytes raw_payload = 3;
+  // VerifyWebhook parity (T15, additive): the ingest webhook proxy forwards
+  // the provider name, signature and headers so Palantir verifies and dedupes
+  // payout webhooks exactly like top-up webhooks.
+  string provider_name = 4;
+  string signature = 5;
+  map<string, string> headers = 6;
+  string saruman_payout_id = 7;
 }
 
 message SettleWithdrawalResponse {
