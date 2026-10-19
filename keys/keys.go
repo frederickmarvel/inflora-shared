@@ -80,6 +80,43 @@ func PalantirRefundKey(refundID string) string {
 	return Derived("palantir_refund:" + refundID)
 }
 
+// PayoutRequestIDKey returns the deterministic payout id for a replay-safe
+// CreatePayout (CONTRACT_DRIFT D-051/D-053): the payout id is derived from
+// the streamer and the client Idempotency-Key so a retried create returns
+// the exact same payout. Tolkien and saruman must call this same function.
+func PayoutRequestIDKey(streamerID, idempotencyKey string) string {
+	return Derived("payout_request:" + streamerID + ":" + idempotencyKey)
+}
+
+// Batch operation keys (CONTRACT_DRIFT D-051, 11-operation-keys.md).
+func CreateBatchKey(batchID string) string {
+	return Derived("create_batch:" + batchID)
+}
+
+func BatchAssignKey(batchID, payoutID string) string {
+	return Derived("batch_assign:" + batchID + ":" + payoutID)
+}
+
+func BatchRevertKey(batchID, payoutID string) string {
+	return Derived("batch_revert:" + batchID + ":" + payoutID)
+}
+
+func CancelBatchKey(batchID string) string {
+	return Derived("cancel_batch:" + batchID)
+}
+
+func SubmitPayoutKey(payoutID string) string {
+	return Derived("submit_payout:" + payoutID)
+}
+
+func SubmitBatchKey(batchID string) string {
+	return Derived("submit_batch:" + batchID)
+}
+
+func CloseBatchKey(batchID string) string {
+	return Derived("close_batch:" + batchID)
+}
+
 // uuidV5 is a minimal UUIDv5 (SHA-1, RFC 4122 §4.3) implementation that
 // does not pull in github.com/google/uuid. We keep this internal so
 // shared does not gain a new top-level dep.

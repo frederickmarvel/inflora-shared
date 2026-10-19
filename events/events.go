@@ -33,6 +33,13 @@ const (
 	FundHoldCreated         = "fund_hold.created.v1"
 	FundHoldReleased        = "fund_hold.released.v1"
 	FraudFlagged            = "fraud.flagged.v1"
+
+	// Provider gateway events (palantir producer, saruman consumer).
+	// pg.gateway.topup.settled.v1 is the dev-only payment-closure event
+	// (CONTRACT_DRIFT D-052); the withdrawal pair closes payouts (D-055).
+	PgGatewayTopupSettled      = "pg.gateway.topup.settled.v1"
+	PgGatewayWithdrawalCompleted = "pg.gateway.withdrawal.completed.v1"
+	PgGatewayWithdrawalFailed    = "pg.gateway.withdrawal.failed.v1"
 )
 
 // DefaultStreamSubjects are the concrete subject prefixes the shared JetStream
@@ -49,6 +56,7 @@ var DefaultStreamSubjects = []string{
 	"fund_hold.>",
 	"fraud.>",
 	"pg.gateway.topup.>",
+	"pg.gateway.withdrawal.>",
 }
 
 var ErrPublisherClosed = errors.New("events: publisher closed")
