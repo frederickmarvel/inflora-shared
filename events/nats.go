@@ -177,7 +177,8 @@ func connect(cfg NATSConfig) (*nats.Conn, nats.JetStreamContext, error) {
 			break
 		}
 	}
-	if _, err = js.StreamInfo(streamName(cfg)); err != nil {
+	info, err := js.StreamInfo(streamName(cfg))
+	if err != nil {
 		if !errors.Is(err, nats.ErrStreamNotFound) {
 			conn.Close()
 			return nil, nil, fmt.Errorf("events: inspect stream: %w", err)
@@ -186,8 +187,37 @@ func connect(cfg NATSConfig) (*nats.Conn, nats.JetStreamContext, error) {
 			conn.Close()
 			return nil, nil, fmt.Errorf("events: ensure stream: %w", err)
 		}
+		return conn, js, nil
+	}
+	// Subject drift: a new event family added to DefaultStreamSubjects after
+	// the stream's first creation never reaches the deployed stream (AddStream
+	// is create-only), and publishes to uncovered subjects fail with "no
+	// response from stream". Sync the stream to the current set at boot.
+	if !sameSubjects(info.Config.Subjects, subjects) {
+		if _, err = js.UpdateStream(&nats.StreamConfig{Name: streamName(cfg), Subjects: subjects}); err != nil {
+			conn.Close()
+			return nil, nil, fmt.Errorf("events: sync stream subjects: %w", err)
+		}
 	}
 	return conn, js, nil
+}
+
+// sameSubjects reports whether two subject lists cover the same subjects,
+// ignoring order and duplicates.
+func sameSubjects(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	seen := make(map[string]struct{}, len(a))
+	for _, s := range a {
+		seen[s] = struct{}{}
+	}
+	for _, s := range b {
+		if _, ok := seen[s]; !ok {
+			return false
+		}
+	}
+	return true
 }
 
 func streamName(cfg NATSConfig) string {
