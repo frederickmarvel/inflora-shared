@@ -18,6 +18,9 @@ const (
 	AccountStreamerPaid      AccountType = "STREAMER_PAID"
 	AccountPlatformRevenue   AccountType = "PLATFORM_REVENUE"
 	AccountMDRRevenue        AccountType = "MDR_REVENUE"
+	// AccountDisbursed holds payout money that has left the streamer balance
+	// for the provider but is not yet bank-settled (CONTRACT_DRIFT D-048).
+	AccountDisbursed AccountType = "DISBURSED"
 )
 
 type Direction string
@@ -40,6 +43,9 @@ const (
 	EntryRefundCredit            EntryType = "REFUND_CREDIT"
 	EntryHoldDebit               EntryType = "HOLD_DEBIT"
 	EntryHoldCredit              EntryType = "HOLD_CREDIT"
+	// EntryStreamerDisbursedCredit is the amended §4 completion leg crediting
+	// the DISBURSED account (CONTRACT_DRIFT D-048).
+	EntryStreamerDisbursedCredit EntryType = "STREAMER_DISBURSED_CREDIT"
 )
 
 type DoubleEntryParams struct {
