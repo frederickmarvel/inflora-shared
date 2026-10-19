@@ -31,7 +31,25 @@ message SettleWithdrawalResponse {
   string bank_reference = 4;
 }
 
+// GetWithdrawalStatus polls the configured provider for a payout's current
+// provider-side truth and refreshes the gateway mirror (D-055 status check).
+// Providers without a status API (Midtrans IRIS) return ErrNotImplemented.
+message GetWithdrawalStatusRequest {
+  string saruman_payout_id = 1;
+  string provider_payout_id = 2;
+}
+
+message GetWithdrawalStatusResponse {
+  string payout_id = 1;
+  string provider_payout_id = 2;
+  string status = 3;          // PROCESSING | COMPLETED | FAILED | unknown
+  string failure_code = 4;
+  string bank_reference = 5;
+  int64 checked_at_unix = 6;
+}
+
 service WithdrawalService {
   rpc CreateWithdrawal(CreateWithdrawalRequest) returns (CreateWithdrawalResponse);
   rpc SettleWithdrawal(SettleWithdrawalRequest) returns (SettleWithdrawalResponse);
+  rpc GetWithdrawalStatus(GetWithdrawalStatusRequest) returns (GetWithdrawalStatusResponse);
 }
