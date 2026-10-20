@@ -16,6 +16,11 @@ message CreateTopUpRequest {
   string user_agent = 9;
   string idempotency_key = 10;
   int64 expires_at_unix = 11;
+  // D-061 (2026-10-20): modular MDR. The gateway fee charged to the donor
+  // ON TOP of amount_idr, and the total the donor pays (amount + mdr).
+  // Zero keeps legacy behavior (palantir infers gross = amount when 0).
+  int64 mdr_idr = 12;
+  int64 gross_charged_idr = 13;
 }
 
 message CreateTopUpResponse {
